@@ -34,7 +34,9 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
   console.log("USER:", user)
   const pathname = request.nextUrl.pathname;
+  console.log("PATHNAME:", pathname);
   const isProtectedRoute = pathname.startsWith("/photos");
+  console.log("🚨 REDIRECTING /photos → /");
 
   if (isProtectedRoute && !user) {
     return NextResponse.redirect(new URL("/", request.url));
