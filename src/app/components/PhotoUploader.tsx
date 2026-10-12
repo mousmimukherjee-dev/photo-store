@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase/browser";
+import { createClient} from "@/lib/supabase/browser";
 
 export default function PhotoUploader() {
+
+  const supabase = createClient()
   const [uploading, setUploading] = useState(false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

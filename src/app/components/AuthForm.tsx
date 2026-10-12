@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabase/browser";
+import { createClient} from "../../lib/supabase/browser";
 
 const AuthForm = () => {
   const [isNewUser, setIsNewUser] = useState(false);
@@ -15,6 +15,7 @@ const AuthForm = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    const supabase = createClient()
     setErrorMessage("");
     setIsSigningUp(false);
 
@@ -33,6 +34,7 @@ const AuthForm = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    const supabase = createClient()
     setErrorMessage("");
 
     const { error } = await supabase.auth.signInWithPassword({
