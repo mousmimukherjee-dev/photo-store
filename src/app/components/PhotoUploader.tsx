@@ -3,67 +3,58 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase/browser";
 
+export default function PhotoUploader() {
+  const [uploading, setUploading] = useState(false);
 
-export default function PhotoUploader(){
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
 
-  const[uploading , setUploading] = useState(false);
+    if (!file) return;
 
+    try {
+      setUploading(true);
 
-  const handleFileUpload= async (e:React.ChangeEvent<HTMLInputElement>)=>{
-   
-   const file = e.target.files?.[0]
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-   if(!file) return;
+      if (!user) {
+        throw new Error("Please log in frist");
+      }
 
-   try{
+      const filePath = `user_uploads/${user.id}/${crypto.randomUUID()}-${file.name}`;
 
-     setUploading(true)
+      const { error: uploadError } = await supabase.storage
+        .from("photos")
+        .upload(filePath, file);
 
-     const{data:{user}} = await supabase.auth.getUser();
+      if (uploadError) throw uploadError;
 
-     if(!user){
+      const { error: databaseError } = await supabase.from("photos").insert({
+        user_id: user.id,
+        file_name: file.name,
+        storage_path: filePath,
+      });
 
-      throw new Error("Please log in frist")
-     }
+      if (databaseError) throw databaseError;
+    } catch (error) {
+      console.error("upload error:", error);
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
 
-     const filePath= `user_uploads/${user.id}/${crypto.randomUUID()}-${file.name}`
-
-     const{error: uploadError} = await supabase.storage.from("photos").upload(filePath,file)
-
-     if(uploadError) throw uploadError
-
-     const{error:databaseError} = await supabase.from("photos").insert({
-
-      user_id: user.id,
-      file_name: file.name,
-      storage_path: filePath
-
-     })
-
-     if(databaseError) throw databaseError
-
-   }
-   catch(error){
-
-    console.error("upload error:",error)
-   }finally{
-
-    setUploading(false);
-    e.target.value=""
-
-   }
-
-
-  }
-
-
-
-  return(
-
-    <label >
+  return (
+    <label>
       {uploading ? "Uploading....." : "Upload Photo"}
-      <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploading} accept="imgae/"/>
+      <input
+        type="file"
+        className="hidden"
+        onChange={handleFileUpload}
+        disabled={uploading}
+        accept="image/"
+      />
     </label>
-    
-  )
-} 
+  );
+}

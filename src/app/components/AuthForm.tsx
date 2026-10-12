@@ -9,11 +9,12 @@ const AuthForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSigningUp, setIsSigningUP] = useState(false);
-const router = useRouter();
-  
+
+  const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -29,26 +30,22 @@ const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const{data,error} = await supabase.auth.signInWithPassword({
+
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
-      password
-    })
+      password,
+    });
 
-    if(error){
-
-      console.error(error.message)
+    if (error) {
+      console.error(error.message);
       return;
     }
 
-    return router.push("/photos")
-
-
-
-
+    return router.push("/photos");
   };
 
   const signUpMessage = (
-    <p className="text-center text-white">
+    <p className="rounded-lg bg-green-50 px-4 py-3 text-center text-sm text-green-700">
       Email sent! Check your email to confirm sign up.
     </p>
   );
@@ -56,40 +53,43 @@ const router = useRouter();
   return (
     <form
       onSubmit={isNewUser ? handleSignUp : handleLogin}
-      className="space-y-8"
+      className="space-y-6"
     >
       <input
         type="email"
         value={email}
         required
         onChange={(e) => setEmail(e.target.value)}
-        className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        className="block w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-400 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
         placeholder="Email"
       />
+
       <input
         type="password"
-        required
         value={password}
+        required
         onChange={(e) => setPassword(e.target.value)}
-        className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        className="block w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-400 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
         placeholder="Password"
       />
+
       <button
         type="submit"
-        className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        className="flex w-full justify-center rounded-xl bg-violet-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
       >
-        {isNewUser ? "Sign up" : "Sign In"}
+        {isNewUser ? "Create account" : "Sign in"}
       </button>
-      <p className="text-center text-white">
+
+      <p className="text-center text-sm text-gray-600">
         {isNewUser ? (
           <>
             Already have an account?{" "}
             <button
               type="button"
               onClick={() => setIsNewUser(false)}
-              className="text-indigo-400 hover:text-indigo-600"
+              className="font-semibold text-violet-600 transition hover:text-violet-800"
             >
-              Sign In
+              Sign in
             </button>
           </>
         ) : (
@@ -98,13 +98,14 @@ const router = useRouter();
             <button
               type="button"
               onClick={() => setIsNewUser(true)}
-              className="text-indigo-400 hover:text-indigo-600"
+              className="font-semibold text-violet-600 transition hover:text-violet-800"
             >
-              Sign Up
+              Sign up
             </button>
           </>
         )}
       </p>
+
       {isSigningUp && signUpMessage}
     </form>
   );
