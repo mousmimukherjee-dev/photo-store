@@ -1,46 +1,67 @@
+
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
-const PhotoGrid= async()=>{
+const PhotoGrid = async () => {
+  const supabase = await createClient();
 
-  const supabase = createClient();
+  const { data: photos, error } = await supabase
+    .from("photos")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-  const{data: photos,error} = await (await supabase).from("photos").select("*").order("created_at",{ascending:false})
+  if (error) {
+    console.error("Error fetching photos:", error);
 
-  if(error){
-
-    console.error("Error fetching problem", error)
-    return <p>Could not upload photos</p>
+    return (
+      <p className="rounded-xl border border-red-200 bg-white p-4 text-sm text-red-600">
+        Could not load photos. Please try again.
+      </p>
+    );
   }
 
-  return(
+  if (!photos || photos.length === 0) {
+    return (
+      <div className="flex min-h-[180px] flex-col items-center justify-center rounded-2xl border border-dashed border-black/15 bg-white p-6 text-center">
+        <p className="text-lg font-medium">Your gallery starts here.</p>
 
-    <section className="max-w-7xl px-4 py-10 mx-auto">
-      {photos.length === 0 ? "No photos uploaded yet" : (
+        <p className="mt-2 text-sm text-[#77796f]">
+          Upload your first photo to share it with the community.
+        </p>
+      </div>
+    );
+  }
 
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {photos.map(async (photo)=>{
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {photos.map((photo) => {
+        const { data } = supabase.storage
+          .from("photos")
+          .getPublicUrl(photo.storage_path);
 
-            const{data} = (await supabase).storage.from("photos").getPublicUrl(photo.storage_path)
+        return (
+          <Link
+            key={photo.id}
+            href={`/photos/${photo.id}`}
+            className="group relative aspect-square overflow-hidden rounded-xl bg-[#e9e9e3]"
+          >
+            <img
+              src={data.publicUrl}
+              alt={photo.file_name || "Community photograph"}
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
 
-            return (
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 pb-3 pt-8">
+              <p className="truncate text-xs font-medium text-white sm:text-sm">
+                {photo.file_name}
+              </p>
+            </div>
+          </Link>
+        );
+      })}
+    </div>
+  );
+};
 
-              <Link href={`/photos/${photo.id}`} className="group relative aspect-square overflow-hidden rounded-xl bg-gray-100">
-
-                <img src={data.publicUrl} alt={photo.file_name} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"/>
-
-                <p className="absolute bottom-0 left-0 right-0 bg-black/50 p-2 text-sm text-white">{photo.file_name}</p>
-              </Link>
-            )
-          })}
-        </div>
-      )}
-
-    </section>
-  )
-
-
-
-}
-
-export default PhotoGrid
+export default PhotoGrid;
